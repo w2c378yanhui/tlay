@@ -23,6 +23,7 @@ import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
 import com.tianluoayi.R;
 import com.tianluoayi.util.Constants;
+import com.tianluoayi.util.DES;
 import com.tianluoayi.util.PrefsUtil;
 
 /**
@@ -63,6 +64,11 @@ public class MainActivity extends AppCompatActivity {
 
             @JavascriptInterface
             public String getHeader(String name) {
+                return PrefsUtil.getPrefs().getString(name, "");
+            }
+
+            @JavascriptInterface
+            public String getOrderIdFromJS(String name) {
                 return PrefsUtil.getPrefs().getString(name, "");
             }
         }, "tlay");
@@ -112,10 +118,16 @@ public class MainActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    public void getRequestFromServer() {
-        OkGo.<PayReq>post("").
+    public void getRequestFromServer(String json) {
+        String data = "";
+        try {
+            data = DES.decode(json);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        OkGo.<PayReq>post(Constants.URL + Constants.GET_ORDERID).
                 tag(this).
-                params("param1", "param1").
+                params("data", data).
                 execute(new Callback<PayReq>() {
                     @Override
                     public void onStart(Request<PayReq, ? extends Request> request) {
